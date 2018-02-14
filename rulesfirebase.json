@@ -1,0 +1,187 @@
+{
+  "rules": {
+    "Operativo":{ 
+      ".read": "auth != null ",
+      "Solicitud": {
+				"$solicitud": {
+          ".write": "auth != null ",
+          ".validate": "newData.hasChildren(['puntoInicio', 'puntoFinal', 'esPagoConTarjeta', 'Nombres', 'Apellidos', 'Celular', 'user_id', 'ValorDomicilio', 'DescripcionDomicilio', 'codigoCiudad']) && (root.child('/Administrativo/Usuarios/'+ newData.child('user_id').val()+'/Rol').val() == 'Administrador')",
+          "puntoInicio": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "puntoFinal": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "Nombres": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "Apellidos": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "Celular": {
+            ".validate": "(newData.isString() && newData.val().length > 0 ) || (newData.isNumber() && newData.val() > 0)"
+          },
+          "user_id": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "ValorDomicilio": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "DescripcionDomicilio": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "codigoCiudad": {
+            ".validate": "(newData.isString() && newData.val().length > 0 ) || (newData.isNumber() && newData.val() > 0)"
+          },
+          "esPagoConTarjeta": {
+            ".validate": "newData.isBoolean()"
+          }
+        }
+      }
+    },
+    "Administrativo": {
+      "ParamsRegistro": {
+        ".read": "auth != null ",
+        ".write": "auth != null && (root.child('/Administrativo/Usuarios/'+ auth.uid +'/Rol').val() == 'Administrador')",
+        "Ciudades": {
+          ".write": "auth != null ",
+          "$ciudad":{
+          	".validate": "newData.hasChildren(['Nombre', 'Prefijo']) && $ciudad.matches(/^[0-9]+$/)",
+            "Nombre": {
+              ".validate": "newData.isString() && newData.val().length > 0"
+            },
+            "Prefijo": {
+              ".validate": "newData.isString() && newData.val().length > 0"
+            }
+          }
+        },
+        "$paramRegistro": {
+          "$param": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          }
+        }
+      },
+      "TipoServicio": {
+        ".read": "auth != null ",
+        ".write": "auth != null && (root.child('/Administrativo/Usuarios/'+ auth.uid +'/Rol').val() == 'Administrador')",
+        "$ciudadTipoServicio": {
+          ".validate": "root.child('/Administrativo/ParamsRegistro/Ciudades/'+$ciudadTipoServicio).exists()",
+          "$servicio": {
+            ".validate": "root.child('/Administrativo/ListaTipoServicios/'+$servicio).exists() && newData.hasChildren(['Tarifas'])",
+            "Tarifas": {
+            	  ".validate": "newData.hasChildren(['Tarifa1', 'Tarifa2', 'Tarifa3'])",
+                "$tarifa": {
+                  ".validate": "newData.hasChildren(['maxKm', 'minKm', 'value'])",
+                  "maxKm":{
+                    ".validate": "newData.isNumber() && (newData.val() >= 0)"
+                  },
+                  "minKm":{
+                    ".validate": "newData.isNumber() && (newData.val() >= 0)"
+                  },
+                  "value":{
+                    ".validate": "newData.isNumber() && (newData.val() >= 0)"
+                  }
+                }
+            }
+          }
+        }
+      },
+      "Roles": {
+        ".read": "auth != null && (root.child('/Administrativo/Usuarios/'+ auth.uid +'/Rol').val() == 'Administrador')",
+        ".write": false
+      },
+      "Usuarios": {
+        ".read": "auth != null && (root.child('/Administrativo/Usuarios/'+ auth.uid +'/Rol').val() == 'Administrador')",
+        ".write": "auth != null && (root.child('/Administrativo/Usuarios/'+ auth.uid +'/Rol').val() == 'Administrador')",
+        "$usuario": {
+          ".read": "auth != null && ((auth.uid == $usuario) || (root.child('/Administrativo/Usuarios/'+ auth.uid +'/Rol').val() == 'Administrador'))",
+          ".write": "auth != null && ((auth.uid == $usuario) || (root.child('/Administrativo/Usuarios/'+ auth.uid +'/Rol').val() == 'Administrador'))",
+          ".validate": "newData.hasChildren(['Nombres', 'Apellidos', 'Cedula', 'Celular', 'CelularFijo', 'Correo', 'Direccion', 'FechaNacimiento', 'TipoCelular', 'TieneDatos', 'TieneEPS', 'TipoVehiculo', 'PlacaVehiculo', 'Rol'])",
+          "Nombres": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "Apellidos": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "Cedula": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "Celular": {
+            ".validate": "(newData.isString() && newData.val().length > 0 ) || (newData.isNumber() && newData.val() > 0)"
+          },
+          "CelularFijo": {
+            ".validate": "(newData.isString() && newData.val().length > 0 ) || (newData.isNumber() && newData.val() > 0)"
+          },
+          "Correo": {
+            ".validate": "newData.isString() && newData.val().matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}$/i)"
+          },
+          "Direccion": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "FechaNacimiento": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "TipoCelular": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "TieneDatos": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "TieneEPS": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "TipoVehiculo": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "PlacaVehiculo": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "Rol": {
+            ".validate": "root.child('/Administrativo/Roles/'+newData.val()).exists()"
+          }
+        }
+      },
+      "Equipamiento": {
+        ".read": "auth != null",
+        ".write": "auth != null && (root.child('/Administrativo/Usuarios/'+ auth.uid +'/Rol').val() == 'Administrador')",
+        ".validate": "newData.hasChildren(['Mensaje', 'MontoParaTrabajarHoy', 'Requisitos'])",
+        "Mensaje": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "MontoParaTrabajarHoy": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "Requisitos": {
+          "$requisito": {
+            ".validate": "newData.hasChildren(['Etiqueta', 'Opciones'])",
+            "Etiqueta": {
+              ".validate": "newData.isString() && newData.val().length > 0"
+            },
+            "Opciones": {
+              "$opcion": {
+                ".validate": "newData.isString() && newData.val().length > 0"
+              }
+            }
+          }
+        }
+      },
+      "Ganancias": {
+        ".read": "auth != null && (root.child('/Administrativo/Usuarios/'+ auth.uid +'/Rol').val() == 'Administrador')",
+        ".write": "auth != null && (root.child('/Administrativo/Usuarios/'+ auth.uid +'/Rol').val() == 'Administrador')",
+        "$ganancia": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        }
+      },
+      "ListaTipoServicios": {
+        ".read": "auth != null && (root.child('/Administrativo/Usuarios/'+ auth.uid +'/Rol').val() == 'Administrador')",
+        ".write": "auth != null && (root.child('/Administrativo/Usuarios/'+ auth.uid +'/Rol').val() == 'Administrador')",
+        "$tipoServicio": {
+          ".validate": "newData.hasChildren(['Nombre'])",
+          "Nombre":{
+            ".validate": "newData.isString() && newData.val().length > 0"
+          }
+        }
+      }
+    }
+  }
+}
