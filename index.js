@@ -131,9 +131,10 @@ exports.integratorLogSolicitud = functions.database
             }
             return Promise.reject(new Error(`El usuario ${userId} no tiene URLs de integración`))
         }).then(response => {
-            const { PlacaVehiculo, Nombres } = response.val()
+            const { PlacaVehiculo, Nombres, Celular } = response.val()
             options.body.NombreMensajero = Nombres;
             options.body.PlacaVehiculo = PlacaVehiculo;
+            options.body.Celular = Celular;
             console.log(options)
             return rp.post(options)
         }).then(response => {

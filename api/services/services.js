@@ -156,13 +156,18 @@ servicesRouter.post('', rules.rulesPost, (req, res) => {
             })
 
             // Geocode puntoFinal
-            const pfc = rp(urlPuntoFinal).then(response => {
+            const geocodePuntoFinal = (_urlPuntoFinal) => rp(_urlPuntoFinal).then(response => {
                 const _response = JSON.parse(response)
                 const finalCoors = _response.results[0].geometry.location
                 schedule.puntoFinalCoors = finalCoors.lat + ',' + finalCoors.lng
                 return Promise.resolve([])
-            }).catch(err => {
-                if (err) return Promise.reject(new Error('No se encontraron las coordenadas de la puntoFinal'));
+            })
+            const pfc = geocodePuntoFinal(urlPuntoFinal).catch(err => {
+                if (err) {
+                    /* return Promise.reject(new Error('No se encontraron las coordenadas de la puntoFinal')) */
+                    schedule.puntoFinal = schedule.puntoInicio;
+                    return geocodePuntoFinal(urlPuntoInical)
+                }
             })
 
             return response = Promise.all([pic, pfc])
