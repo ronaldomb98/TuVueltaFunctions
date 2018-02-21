@@ -140,6 +140,10 @@ exports.integratorLogSolicitud = functions.database
         }).then(response => {
             console.log(JSON.stringify(response))
             return 0
+        }).catch(err => {
+            if (err) {
+                return 0
+            }
         })
     })
 
