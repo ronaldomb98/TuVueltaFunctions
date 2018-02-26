@@ -11,8 +11,10 @@ if (!admin.apps.length) {
     admin.initializeApp(functions.config().firebase)
 }
 const ref = admin.database().ref()
-let holidaysRouter = express.Router();
-holidaysRouter.post('', rules.rulesPost, (req, res) => {
+let usersRouter = express.Router();
+
+
+usersRouter.post('/nuevo', rules.rulesPost, (req, res) => {
 
     /**
      * Validate if the request has the required data
@@ -24,12 +26,10 @@ holidaysRouter.post('', rules.rulesPost, (req, res) => {
 
     /** 
      * Get data from request.
-     * Prepare date.
+     * Prepare the root object to interact with database
     */
-    const { ano, mes, dia, descripcion, idToken } = req.body;
+    const { email, password, idToken } = req.body;
     const root = ref.root;
-    const date = new Date(ano, mes, dia);
-    const time = date.getTime();
 
     /**
      * Validate if token is valid.
@@ -38,33 +38,34 @@ holidaysRouter.post('', rules.rulesPost, (req, res) => {
     const p_token = admin.auth().verifyIdToken(idToken)
     const p_rol = p_token.then(response => {
         const { uid } = response
+        
         return root.child(`/Administrativo/Usuarios/${uid}/Rol`).once('value')
     })
 
     /**
      * Verify if user has permissions to do this action. 
-     * If user has permissions, then proceeds to create a new Festivo data.
+     * If user has permissions, then proceeds to create a new user.
      * If user doesn't have permissions return a error with the reason.
      */
     const p_hasPermision = p_rol.then(response => {
         if (response.val() === Globals.ROLES.Administrador) {
-            return ref.child(`/Administrativo/InfoRecargos/Festivos/${time}`).update({ Nombre: descripcion })
+            return admin.auth().createUser({email: email, password: password})
         }
-        return Promise.reject(new Error('Solo un Administrador puede hacer una solicitud.'))
+        return Promise.reject(new Error('Solo un Administrador puede hacer esta peticion.'))
     })
-
 
     /**
      * Return a response with success or error object for respective case.
      */
-    return p_hasPermision.then(response => {
-        return res.status(200).type('application/json').send({ mensaje: "Festivo creado exitosamente", festivo: descripcion, festivo_id: time });
+    return p_hasPermision.then(userRecord => {
+        const uid = userRecord.uid;
+        return res.status(200).type('application/json').send({ mensaje: "Usuario creado exitosamente", uid: uid });
     }).catch(err => {
         if (err) {
-            return res.status(400).type('application/json').send({ mensaje: 'No se pudo crear festivo.', error: err.message })
+            return res.status(400).type('application/json').send({ mensaje: 'No se pudo crear usuario.', error: err.message })
         }
-        return res.status(400).type('application/json').send({ mensaje: 'No se pudo crear festivo.' })
+        return res.status(400).type('application/json').send({ mensaje: 'No se pudo crear usuario.' })
     })
 })
 
-exports.holidaysRouter = holidaysRouter
+exports.usersRouter = usersRouter

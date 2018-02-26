@@ -4,6 +4,7 @@ const app = express();
 const servicesApi = require('./api/services/services.js')
 const holidaysApi = require('./api/holidays/holidays.js')
 const reportsApi = require('./api/reportes/reportes.js')
+const usersApi = require('./api/users/users.js')
 const cors = require('cors');
 const rp = require('request-promise');
 app.use(cors());
@@ -211,19 +212,16 @@ exports.reallocateSolicitud = functions.database
                     }
 
                     return setTimeout(() => {
-                        return pu_creditoRetiro.update({
+                        const p1 = pu_creditoRetiro.update({
                             GananciaMensajero: GananciaMensajero,
                             servicio_id: solicitudId
-                        }).then(() => {
-                            return event.data.ref.update({
-                                EsActualizacion: false,
-                                fechaCompra: newFechaCompra
-                            })
-                        }).catch(err => {
-                            if (err) {
-                                console.log(err.message)
-                            }
                         })
+                        const p2 = event.data.ref.update({
+                            EsActualizacion: false,
+                            fechaCompra: newFechaCompra
+                        })
+                        return Promise.all([p1, p2]);
+
                     }, 10000);
                 })
             }
@@ -242,4 +240,7 @@ app.use(function (req, res, next) {
 app.use('/holiday', holidaysApi.holidaysRouter)
 app.use('/solicitudes', servicesApi.servicesRouter)
 app.use('/reportes', reportsApi.reportsRouter)
+app.use('/usuarios', usersApi.usersRouter)
+
+
 exports.api = functions.https.onRequest(app)
