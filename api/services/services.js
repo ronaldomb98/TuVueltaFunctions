@@ -98,16 +98,16 @@ servicesRouter.post('', rules.rulesPost, (req, res) => {
         ValorDomicilio: req.body.ValorDomicilio,
         user_id: req.body.user_id,
         Descripcion: req.body.Descripcion ? req.body.Descripcion : null,
-        
+
         TipoServicio: 'Domicilios',
         DescripcionDomicilio: req.body.DescripcionDomicilio,
-        
+
         codigoCiudad: _codigoCiudad
     };
 
-    if (!servicio_id){
+    if (!servicio_id) {
         schedule.Estado = 'Pendiente';
-        schedule.EnProceso= false;
+        schedule.EnProceso = false;
     }
 
     const isQuote = req.body.EsCotizacion
@@ -135,8 +135,8 @@ servicesRouter.post('', rules.rulesPost, (req, res) => {
 
             const city = response.val()
             schedule.Ciudad = city.Nombre
-            schedule.puntoInicio =  schedule.puntoInicio.replace(', '+city.Prefijo, '')
-            schedule.puntoFinal =   schedule.puntoFinal.replace(', '+city.Prefijo, '')
+            schedule.puntoInicio = schedule.puntoInicio.replace(', ' + city.Prefijo, '')
+            schedule.puntoFinal = schedule.puntoFinal.replace(', ' + city.Prefijo, '')
             schedule.puntoInicio += ', ' + city.Prefijo
             schedule.puntoFinal += ', ' + city.Prefijo
             // Geocoding config
@@ -242,33 +242,31 @@ servicesRouter.post('', rules.rulesPost, (req, res) => {
         const hour = date.getHours();
         const today = new Date(year, month, dayMonth).getTime();
         const bogotaHour = moment.tz(uid, "America/Bogota").format("H");
-        const bogotaDayWeek = moment.tz(uid, "America/Bogota").day();
+        const bogotaDayWeek = moment.tz(uid, "America/Bogota").isoWeekday();
         const incrementAmount = () => {
             schedule.TotalAPagar += data.Monto
             return Promise.resolve([])
         }
-
+        /* console.log(`Monto a pagar antes de recargo ${schedule.TotalAPagar}`) */
         // Recargo Domingo
-        if (bogotaDayWeek === 7) {
-            console.log(`Aplicando recargo porque hoy es domingo`)
-            return incrementAmount();
-        }
-
-        // Recargo Horas de noche o madrugada
-        if (bogotaHour <= hourBefore || bogotaHour >= hourAfter) {
+        if (Number(bogotaDayWeek) === 7) {
+            console.log(`Aplicando recargo porque hoy es Domingo`)
+            incrementAmount();
+        } else if (bogotaHour <= hourBefore || bogotaHour >= hourAfter) {
+            // Recargo Horas de noche o madrugada
             console.log(`Aplicando recargo porque ${bogotaHour} es hora menor a ${hourBefore} o mayor a ${hourAfter}`)
-            return incrementAmount();
-        }
-
-        // Recargo dias festivos
-        if (holidays) {
+            incrementAmount();
+        } else if (holidays) {
+            // Recargo dias festivos
             if (holidays[today]) {
                 console.log(`Aplicando recargo por festivo ${holidays[today].Nombre}`)
                 return incrementAmount();
             }
+        } else {
+            console.log(`No se aplico recargos`)
         }
+        /* console.log(`Monto a pagar despues de recargo ${schedule.TotalAPagar}`) */
 
-        console.log(`No se aplico recargos`)
         return Promise.resolve([])
     }).then(() => {
         return ref.child(`/Administrativo/Ganancias`).once('value')
