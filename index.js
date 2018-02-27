@@ -69,7 +69,6 @@ exports.relanzamiento = functions.database
             const _data = snap.val()
             console.log(_data)
             let totalCrdtsR = 0
-            totalCrdtsR -= _relanzamiento.GananciaMensajero;
             totalCrdtsR -= _relanzamiento.Multa;
             if (_data && _data.CreditosRetiro) {
                 totalCrdtsR += _data.CreditosRetiro
