@@ -5,6 +5,7 @@ const servicesApi = require('./api/services/services.js')
 const holidaysApi = require('./api/holidays/holidays.js')
 const reportsApi = require('./api/reportes/reportes.js')
 const usersApi = require('./api/users/users.js')
+const googleApi = require('./api/google/google.js')
 const cors = require('cors');
 const rp = require('request-promise');
 app.use(cors());
@@ -240,6 +241,7 @@ app.use('/holiday', holidaysApi.holidaysRouter)
 app.use('/solicitudes', servicesApi.servicesRouter)
 app.use('/reportes', reportsApi.reportsRouter)
 app.use('/usuarios', usersApi.usersRouter)
+app.use('/google', googleApi.googleRouter)
 
-
+googleApi
 exports.api = functions.https.onRequest(app)
