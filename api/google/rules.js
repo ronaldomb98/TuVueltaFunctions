@@ -10,7 +10,12 @@ const geocode = [
     check('idToken').exists().withMessage("Campo Obligatorio")
 ]
 
+const directions = [
+    check('idToken').exists().withMessage("Campo Obligatorio")
+]
+
 module.exports = {
     distanceMatrix: distanceMatrix,
-    geocode: geocode
+    geocode: geocode,
+    directions: directions
 }

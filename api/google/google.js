@@ -83,4 +83,36 @@ googleRouter.post('/geocode', rules.geocode, (req, res) => {
     })
 })
 
+googleRouter.post('/directions', rules.directions, (req, res) => {
+    /**
+     * Validate if the request has the required data
+     */
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.mapped() });
+    }
+
+    /** 
+     * Get data from request and validate if user has a valid token.
+    */
+    const { latlng, result_type, idToken } = req.body;
+    const p_token = admin.auth().verifyIdToken(idToken)
+    const _params = Object.keys(req.body).filter(key => key !== 'idToken')
+    /**
+     * Make the request to google api and return a response.
+     */
+    return p_token.then(res => {
+        const key = evironemnt.google.geocoding;
+        let url = `https://maps.googleapis.com/maps/api/directions/json?key=${key}`;
+        _params.forEach(key => url+=`&${key}=${req.body[key]}`)
+        const options = { method: 'POST', uri: url, json: true };
+        return rp.get(options)
+
+    }).then(snap => {
+        return res.status(200).type('application/json').send({ mensaje: "Directions", data: snap });
+    }).catch(err => {
+        return res.status(500).type('application/json').send({ mensaje: 'Error Direcciones', err: err.message })
+    })
+})
+
 exports.googleRouter = googleRouter
